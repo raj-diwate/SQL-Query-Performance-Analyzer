@@ -1,43 +1,62 @@
-CREATE TABLE `users` (
-  `user_id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- db_list table
+CREATE TABLE db_list (
+    database_id INT AUTO_INCREMENT PRIMARY KEY,
+    database_name VARCHAR(100)
+);
 
+-- users table
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50)
+);
 
-CREATE TABLE `queries` (
-  `query_id` int NOT NULL AUTO_INCREMENT,
-  `query_text` text,
-  PRIMARY KEY (`query_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- queries table
+CREATE TABLE queries (
+    query_id INT AUTO_INCREMENT PRIMARY KEY,
+    query_text TEXT
+);
 
+-- frequent_queries table
+CREATE TABLE frequent_queries (
+    query_text TEXT,
+    execution_count BIGINT NOT NULL DEFAULT 0
+);
 
-CREATE TABLE `query_logs` (
-  `log_id` int NOT NULL AUTO_INCREMENT,
-  `query_id` int DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
-  `database_id` int DEFAULT NULL,
-  `execution_time_ms` int DEFAULT NULL,
-  `rows_examined` int DEFAULT NULL,
-  `rows_returned` int DEFAULT NULL,
-  `execution_status` varchar(20) DEFAULT NULL,
-  `executed_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`log_id`),
-  KEY `idx_query_id` (`query_id`),
-  KEY `idx_user_id` (`user_id`),
-  KEY `idx_database_id` (`database_id`),
-  KEY `idx_execution_time` (`execution_time_ms`),
-  CONSTRAINT `query_logs_ibfk_1` FOREIGN KEY (`query_id`) REFERENCES `queries` (`query_id`),
-  CONSTRAINT `query_logs_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  CONSTRAINT `query_logs_ibfk_3` FOREIGN KEY (`database_id`) REFERENCES `db_list` (`database_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- inefficient_queries table
+CREATE TABLE inefficient_queries (
+    query_text TEXT,
+    rows_examined INT,
+    rows_returned INT,
+    inefficiency_ratio DECIMAL(14,4)
+);
 
+-- slow_queries table
+CREATE TABLE slow_queries (
+    query_text TEXT,
+    avg_execution_time DECIMAL(14,4)
+);
 
+-- query_logs table
+CREATE TABLE query_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    query_id INT,
+    user_id INT,
+    database_id INT,
+    execution_time_ms INT,
+    rows_examined INT,
+    rows_returned INT,
+    execution_status VARCHAR(20),
+    executed_at TIMESTAMP,
+    FOREIGN KEY (query_id) REFERENCES queries(query_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (database_id) REFERENCES db_list(database_id)
+);
 
-
-CREATE TABLE `db_list` (
-  `database_id` int NOT NULL AUTO_INCREMENT,
-  `database_name` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`database_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
+-- slow_query_log table
+CREATE TABLE slow_query_log (
+    slow_log_id INT AUTO_INCREMENT PRIMARY KEY,
+    log_id INT,
+    query_id INT,
+    execution_time_ms INT,
+    logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
